@@ -3,6 +3,8 @@ package me.sat7.bustaMine.Commands;
 import me.sat7.bustaMine.BustaMine;
 import me.sat7.bustaMine.CustomConfig;
 import me.sat7.bustaMine.Game;
+import me.sat7.bustaMine.GraphBoard;
+import me.sat7.bustaMine.NpcButtonManager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -58,8 +60,8 @@ public class Command implements CommandExecutor {
             {
                 case "help":
                 case "?":
-                    player.sendMessage(BustaMine.prefix + "Help");
-                    player.sendMessage("/bm [money | exp]");
+                    player.sendMessage(BustaMine.prefix + "도움말");
+                    player.sendMessage("/bm [money | exp]  §e밈장 열기");
                     player.sendMessage("/bm stats [player]");
                     player.sendMessage("/bm top [NetProfit | NetProfit_Exp | GamesPlayed]");
                     if (player.hasPermission("bm.admin"))
@@ -67,6 +69,8 @@ public class Command implements CommandExecutor {
                         player.sendMessage(BustaMine.ccLang.get().getString("Help.BmGo"));
                         player.sendMessage(BustaMine.ccLang.get().getString("Help.BmStop"));
                         player.sendMessage(BustaMine.ccLang.get().getString("Help.BmStatistics"));
+                        player.sendMessage("/bm graph [select | info | clear | reload]");
+                        player.sendMessage("/bm npc [create | remove | list | clear | reload]");
                         player.sendMessage(BustaMine.ccLang.get().getString("Help.BmTest"));
                         player.sendMessage(BustaMine.ccLang.get().getString("Help.BmReloadConfig"));
                         player.sendMessage(BustaMine.ccLang.get().getString("Help.BmReloadLang"));
@@ -131,7 +135,82 @@ public class Command implements CommandExecutor {
                         }
                     } else
                     {
-                        Game.Top(player, "NetProfit");
+                    Game.Top(player, "NetProfit");
+                    }
+                    break;
+                case "graph":
+                    if (!player.hasPermission("bm.admin"))
+                    {
+                        player.sendMessage(BustaMine.prefix + BustaMine.ccLang.get().getString("Message.NoPermission"));
+                        return true;
+                    }
+
+                    if (args.length < 2)
+                    {
+                        player.sendMessage(BustaMine.prefix + "/bm graph [select | info | clear | reload]");
+                        return true;
+                    }
+
+                    switch (args[1].toLowerCase(Locale.ROOT))
+                    {
+                        case "select":
+                            GraphBoard.beginSelection(player);
+                            break;
+                        case "info":
+                            GraphBoard.info(player);
+                            break;
+                        case "clear":
+                            GraphBoard.clear(player);
+                            break;
+                        case "reload":
+                            GraphBoard.setup();
+                            player.sendMessage(BustaMine.prefix + "밈장 차트를 리로드했습니다.");
+                            break;
+                        default:
+                            player.sendMessage(BustaMine.prefix + "/bm graph [select | info | clear | reload]");
+                            break;
+                    }
+                    break;
+                case "npc":
+                    if (!player.hasPermission("bm.admin"))
+                    {
+                        player.sendMessage(BustaMine.prefix + BustaMine.ccLang.get().getString("Message.NoPermission"));
+                        return true;
+                    }
+
+                    if (args.length < 2)
+                    {
+                        player.sendMessage(BustaMine.prefix + "/bm npc [create | remove | list | clear | reload]");
+                        player.sendMessage(BustaMine.prefix + "동작: menu(밈장), cashout(익절/탈출), bet-small(진입), bet-medium(물타기), bet-big(풀진입)");
+                        return true;
+                    }
+
+                    switch (args[1].toLowerCase(Locale.ROOT))
+                    {
+                        case "create":
+                            if (args.length < 3)
+                            {
+                                player.sendMessage(BustaMine.prefix + "동작: menu(밈장), cashout(익절/탈출), bet-small(진입), bet-medium(물타기), bet-big(풀진입)");
+                                return true;
+                            }
+                            NpcButtonManager.create(player, args[2]);
+                            break;
+                        case "remove":
+                            NpcButtonManager.removeNearest(player);
+                            break;
+                        case "list":
+                            NpcButtonManager.list(player);
+                            break;
+                        case "clear":
+                            NpcButtonManager.clear(player);
+                            break;
+                        case "reload":
+                            NpcButtonManager.setup();
+                            player.sendMessage(BustaMine.prefix + "NPC 버튼을 리로드했습니다.");
+                            break;
+                        default:
+                            player.sendMessage(BustaMine.prefix + "/bm npc [create | remove | list | clear | reload]");
+                            break;
                     }
                     break;
                 case "reloadConfig":
@@ -147,6 +226,8 @@ public class Command implements CommandExecutor {
                     BustaMine.ccSound.reload();
                     BustaMine.UpdateConfig();
                     Game.RefreshIcons();
+                    GraphBoard.setup();
+                    NpcButtonManager.setup();
 
                     player.sendMessage(BustaMine.prefix + BustaMine.ccLang.get().getString("Message.Reload_FromNextRound"));
                     break;
@@ -164,7 +245,7 @@ public class Command implements CommandExecutor {
                     Game.StartGame();
                     Game.gameEnable = true;
 
-                    player.sendMessage(BustaMine.prefix + "Game was terminated by server");
+                    player.sendMessage(BustaMine.prefix + "밈장이 서버에 의해 종료되었습니다.");
                     player.sendMessage(BustaMine.prefix + BustaMine.ccLang.get().getString("Message.Reload2"));
                     break;
                 case "go":

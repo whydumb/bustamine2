@@ -25,7 +25,7 @@ public class Game
     private static int betTimeLeft;
     private static int BetCountDown()
     {
-        //Bukkit.getServer().broadcastMessage(BustaMine.prefix + betTimeLeft + "초 후 새 게임 시작");
+        //Bukkit.getServer().broadcastMessage(BustaMine.prefix + betTimeLeft + "珥?????寃뚯엫 ?쒖옉");
         betTimeLeft -= 1;
         return betTimeLeft;
     }
@@ -96,8 +96,8 @@ public class Game
     public static final HashMap<String,HashMap<String,Double>> sortedMap = new HashMap<>();
     public static final HashMap<String,Long> sortedTime = new HashMap<>();
 
-    public static final HashMap<String, String> playerMap = new HashMap<>(); // uuid, 베팅타입
-    public static final ConcurrentHashMap<String, Integer> activePlayerMap = new ConcurrentHashMap<>(); // uuid, 베팅금액
+    public static final HashMap<String, String> playerMap = new HashMap<>(); // uuid, bet type
+    public static final ConcurrentHashMap<String, Integer> activePlayerMap = new ConcurrentHashMap<>(); // uuid, bet amount
     public static final HashMap<String, Integer> headPos = new HashMap<>();
 
     private static final List<ItemStack> coloredGlass = new ArrayList<>();
@@ -170,6 +170,7 @@ public class Game
     public static void StartGame()
     {
         if(bustaTask != null) bustaTask.cancel();
+        MarketTheme.rollNext();
 
         playerMap.clear();
         activePlayerMap.clear();
@@ -187,8 +188,9 @@ public class Game
 
         bState = bustaState.bet;
         betTimeLeft = BustaMine.ccConfig.get().getInt("RoundInterval") + 1;
+        GraphBoard.startBetting(BustaMine.ccConfig.get().getInt("RoundInterval"));
 
-        // 확률정보 표시
+        // ?뺣쪧?뺣낫 ?쒖떆
         if(BustaMine.ccConfig.get().getBoolean("ShowWinChance"))
         {
             ItemStack winChance = CreateItemStack(Material.getMaterial(BustaMine.ccConfig.get().getString("BtnIcon.WinChance")),null,
@@ -200,7 +202,7 @@ public class Game
             winChanceArr.add("§ex3: " + df.format((oddList[2]-bustchance)*100*(1-baseInstabust)) + "%");
             winChanceArr.add("§ex7: " + df.format((oddList[6]-bustchance)*100*(1-baseInstabust)) + "%");
             winChanceArr.add("§ex12: " + df.format((oddList[11]-bustchance)*100*(1-baseInstabust)) + "%");
-            winChanceArr.add("§eInstaBust: " + df.format((bustchance+baseInstabust)*100) + "%");
+            winChanceArr.add("§e즉시 급락: " + df.format((bustchance+baseInstabust)*100) + "%");
             winChanceArr.add("§e"+ BustaMine.ccLang.get().getString("MaximumMultiplier") +": x" + BustaMine.ccConfig.get().getInt("MultiplierMax"));
 
             ItemMeta tempMeta = winChance.getItemMeta();
@@ -215,12 +217,12 @@ public class Game
             gameInven_exp.setItem(46,null);
         }
 
-        // 뱅크롤
+        // Bankroll
         if(BustaMine.ccConfig.get().getBoolean("ShowBankroll"))
         {
             if(gameInven.getItem(45) == null)
             {
-                //System.out.println("뱅크롤버튼 재생성");
+                //System.out.println("諭낇겕濡ㅻ쾭???ъ깮??);
                 ItemStack bankrollBtn = CreateItemStack(Material.getMaterial(BustaMine.ccConfig.get().getString("BtnIcon.Bankroll")),null,
                         BustaMine.ccLang.get().getString("UI.Bankroll"), null,1);
                 gameInven.setItem(45,bankrollBtn);
@@ -235,45 +237,45 @@ public class Game
             gameInven_exp.setItem(45,null);
         }
 
-        // 베팅 버튼들
+        // Betting buttons
         {
-            ItemStack bet10Btn = CreateItemStack(Material.getMaterial(BustaMine.ccConfig.get().getString("BtnIcon.BetSmall")),null,
-                    BustaMine.ccLang.get().getString("UI.BetBtn")+" §e" + BustaMine.ccConfig.get().getString("CurrencySymbol") + BustaMine.ccConfig.get().getInt("Bet.Small"), null,1);
+            ItemStack bet10Btn = CreateItemStack(MarketTheme.getCurrentIcon(),null,
+                    BustaMine.ccLang.get().getString("UI.BetSmall")+" §e" + BustaMine.ccConfig.get().getString("CurrencySymbol") + BustaMine.ccConfig.get().getInt("Bet.Small"), null,1);
             gameInven.setItem(51,bet10Btn);
-            ItemStack betE1Btn = CreateItemStack(Material.getMaterial(BustaMine.ccConfig.get().getString("BtnIcon.BetSmall")),null,
-                    BustaMine.ccLang.get().getString("UI.BetBtn")+" §eXp"+BustaMine.ccConfig.get().getInt("Bet.ExpSmall"), null,1);
+            ItemStack betE1Btn = CreateItemStack(MarketTheme.getCurrentIcon(),null,
+                    BustaMine.ccLang.get().getString("UI.BetSmall")+" §eXp"+BustaMine.ccConfig.get().getInt("Bet.ExpSmall"), null,1);
             gameInven_exp.setItem(51,betE1Btn);
 
             // 100
-            ItemStack bet100Btn = CreateItemStack(Material.getMaterial(BustaMine.ccConfig.get().getString("BtnIcon.BetMedium")),null,
-                    BustaMine.ccLang.get().getString("UI.BetBtn")+" §e"+BustaMine.ccConfig.get().getString("CurrencySymbol") + BustaMine.ccConfig.get().getInt("Bet.Medium"), null,1);
+            ItemStack bet100Btn = CreateItemStack(MarketTheme.getCurrentIcon(),null,
+                    BustaMine.ccLang.get().getString("UI.BetMedium")+" §e"+BustaMine.ccConfig.get().getString("CurrencySymbol") + BustaMine.ccConfig.get().getInt("Bet.Medium"), null,1);
             gameInven.setItem(52,bet100Btn);
-            ItemStack betE2Btn = CreateItemStack(Material.getMaterial(BustaMine.ccConfig.get().getString("BtnIcon.BetMedium")),null,
-                    BustaMine.ccLang.get().getString("UI.BetBtn")+" §eXp"+BustaMine.ccConfig.get().getInt("Bet.ExpMedium"), null,1);
+            ItemStack betE2Btn = CreateItemStack(MarketTheme.getCurrentIcon(),null,
+                    BustaMine.ccLang.get().getString("UI.BetMedium")+" §eXp"+BustaMine.ccConfig.get().getInt("Bet.ExpMedium"), null,1);
             gameInven_exp.setItem(52,betE2Btn);
 
             // 1000
-            ItemStack bet1000Btn = CreateItemStack(Material.getMaterial(BustaMine.ccConfig.get().getString("BtnIcon.BetBig")),null,
-                    BustaMine.ccLang.get().getString("UI.BetBtn")+" §e"+BustaMine.ccConfig.get().getString("CurrencySymbol") + BustaMine.ccConfig.get().getInt("Bet.Big"), null,1);
+            ItemStack bet1000Btn = CreateItemStack(MarketTheme.getCurrentIcon(),null,
+                    BustaMine.ccLang.get().getString("UI.BetBig")+" §e"+BustaMine.ccConfig.get().getString("CurrencySymbol") + BustaMine.ccConfig.get().getInt("Bet.Big"), null,1);
             gameInven.setItem(53,bet1000Btn);
-            ItemStack betE3Btn = CreateItemStack(Material.getMaterial(BustaMine.ccConfig.get().getString("BtnIcon.BetBig")),null,
-                    BustaMine.ccLang.get().getString("UI.BetBtn")+" §eXp"+BustaMine.ccConfig.get().getInt("Bet.ExpBig"), null,1);
+            ItemStack betE3Btn = CreateItemStack(MarketTheme.getCurrentIcon(),null,
+                    BustaMine.ccLang.get().getString("UI.BetBig")+" §eXp"+BustaMine.ccConfig.get().getInt("Bet.ExpBig"), null,1);
             gameInven_exp.setItem(53,betE3Btn);
         }
 
         ItemMeta im = gameInven.getItem(49).getItemMeta();
         ArrayList<String> betLore = new ArrayList<>();
-        betLore.add("§b§l" + "Bet >>>");
+        betLore.add("§b§l" + "진입 >>>");
         im.setLore(betLore);
         gameInven.getItem(49).setItemMeta(im);
         gameInven_exp.getItem(49).setItemMeta(im);
 
-        // 베팅대기, 게임 시작
+        // 踰좏똿?湲? 寃뚯엫 ?쒖옉
         bustaTask = Bukkit.getScheduler().runTaskTimer(BustaMine.plugin, () ->
         {
             if(BetCountDown() <= 0)
             {
-                // 게임 시작
+                // 寃뚯엫 ?쒖옉
                 bustaTask.cancel();
 
                 for (Integer key:old.keySet()) {
@@ -309,9 +311,10 @@ public class Game
             }
             else
             {
-                // 카운트 다운
+                // 移댁슫???ㅼ슫
                 ArrayList<String> nextRoundLore = new ArrayList<>();
-                nextRoundLore.add("§b§l" + "Next round in " + betTimeLeft + "s");
+                nextRoundLore.add("§b§l" + "다음 밈장 개장 " + betTimeLeft + "초");
+                GraphBoard.updateBettingCountdown(betTimeLeft);
 
                 if(betTimeLeft <= 5) DrawNumber(betTimeLeft);
 
@@ -335,27 +338,29 @@ public class Game
         gameLoopDelay = 4;
 
         bustNum = GenBustNum();
+        GraphBoard.startRun();
 
         RunCmb_RoundStart();
 
         bustaTask = Bukkit.getScheduler().runTaskTimer(BustaMine.plugin, () ->
         {
             boolean instaBust = (bustNum == 100);
+            int loopNum = gameLoop();
 
-            if(gameLoop() > bustNum)
+            if(loopNum > bustNum)
             {
-                // 버스트!
+                // 踰꾩뒪??
                 bustaTask.cancel();
 
                 Bust(instaBust);
 
-                // 뱅크롤 확인. 필요시 게임 정지
+                // 諭낇겕濡??뺤씤. ?꾩슂??寃뚯엫 ?뺤?
 //                if(BustaMine.ccBank.get().getDouble("Bankroll.Money") < 0)
 //                {
 //                    gameEnable = false;
 //                }
 
-                // 다음게임 시작 대기
+                // Queue next game
                 if(gameEnable)
                 {
                     bustaTask = Bukkit.getScheduler().runTaskLater(BustaMine.plugin, Game::StartGame,80);
@@ -364,7 +369,9 @@ public class Game
                 return;
             }
 
-            // 캐시아웃 버튼 lore 업데이트 (ex. x2.34)
+            // 罹먯떆?꾩썐 踰꾪듉 lore ?낅뜲?댄듃 (ex. x2.34)
+            GraphBoard.updateMultiplier(loopNum);
+
             ArrayList<String> tempArr = new ArrayList<>();
             tempArr.add("§a§lx" + df.format(curNum / 100.0));
 
@@ -425,6 +432,7 @@ public class Game
     {
         bState = bustaState.busted;
         if(instaBust) curNum = 100;
+        GraphBoard.bust(curNum);
 
         RunCmb_RoundEnd(curNum);
 
@@ -434,10 +442,10 @@ public class Game
         }
         if(BustaMine.ccConfig.get().getInt("Broadcast.Jackpot")*100 <= curNum)
         {
-            Bukkit.getServer().broadcastMessage(BustaMine.prefix + "§a§lBusted! : x" + df.format(curNum / 100.0));
+            Bukkit.getServer().broadcastMessage(BustaMine.prefix + "§c§l" + BustaMine.ccLang.get().getString("Busted") + "! : x" + df.format(curNum / 100.0));
         }
 
-        // 버스트된 사람들 채팅창에 띄우기
+        // Tell remaining players who busted.
         for(String s : playerMap.keySet())
         {
             try {
@@ -446,7 +454,7 @@ public class Game
                     {
                         UUID uuid = UUID.fromString(s);
                         UUID uuidBust = UUID.fromString(bustP);
-                        BustaMine.plugin.getServer().getPlayer(uuid).sendMessage("§6♣ " + BustaMine.plugin.getServer().getPlayer(uuidBust).getName() + " §4" + BustaMine.ccLang.get().getString("Busted"));
+                        BustaMine.plugin.getServer().getPlayer(uuid).sendMessage("§6" + BustaMine.plugin.getServer().getPlayer(uuidBust).getName() + " §4" + BustaMine.ccLang.get().getString("Busted"));
                     }catch (Exception ignored){}
                 }
             }catch (Exception ignored){}
@@ -460,7 +468,7 @@ public class Game
             }catch (Exception ignored){}
         }
 
-        // 캐시아웃버튼 lore 빨간색으로 업데이트
+        // 罹먯떆?꾩썐踰꾪듉 lore 鍮④컙?됱쑝濡??낅뜲?댄듃
         ArrayList<String> tempArr = new ArrayList<>();
         tempArr.add("§c§lx" + df.format(curNum / 100.0));
         ItemMeta im = gameInven.getItem(49).getItemMeta();
@@ -468,7 +476,7 @@ public class Game
         gameInven.getItem(49).setItemMeta(im);
         gameInven_exp.getItem(49).setItemMeta(im);
 
-        // 배경
+        // 諛곌꼍
         for(int i = 0; i<45; i++)
         {
             if(!headPos.containsValue(i))
@@ -494,11 +502,11 @@ public class Game
             gameInven_exp.setItem(i,glass);
         }
 
-        // 히스토리 추가
+        // ?덉뒪?좊━ 異붽?
         history.add(curNum);
         if(history.size()>16)history.remove(0);
 
-        // 히스토리 갱신
+        // ?덉뒪?좊━ 媛깆떊
         ArrayList<String> historyArr = new ArrayList<>();
         for(int i : history)
         {
@@ -517,32 +525,33 @@ public class Game
         gameInven.getItem(48).setItemMeta(im2);
         gameInven_exp.getItem(48).setItemMeta(im2);
 
-        // 데이터 저장
+        // Save data
         BustaMine.ccBank.save();
         BustaMine.ccUser.save();
     }
 
     public static void Bet(Player p, bustaType type, int amount)
     {
-        // 이미 게임진행중.
+        // ?대? 寃뚯엫吏꾪뻾以?
         if(bState != bustaState.bet) return;
 
-        // 이미 참여함
+        // First participation this round
         boolean firstBet = !activePlayerMap.containsKey(p.getUniqueId().toString());
         int old = 0;
         if(activePlayerMap.containsKey(p.getUniqueId().toString())) old = activePlayerMap.get(p.getUniqueId().toString());
 
-        // 다른 유형으로 참가중
+        // Do not allow mixing money and exp in one round.
         if(playerMap.containsKey(p.getUniqueId().toString()) && !playerMap.get(p.getUniqueId().toString()).equals(type.toString()))
         {
-            //p.sendMessage("다른 유형으로 참가중");
+            //p.sendMessage("?ㅻⅨ ?좏삎?쇰줈 李멸?以?);
             return;
         }
 
-        // 돈으로 참가
+        // ?덉쑝濡?李멸?
         if(type == bustaType.money)
         {
-            if(old+amount > BustaMine.ccConfig.get().getInt("Bet.Max"))
+            int maxBet = BustaMine.ccConfig.get().getInt("Bet.Max");
+            if(maxBet > 0 && old+amount > maxBet)
             {
                 p.sendMessage(BustaMine.prefix+BustaMine.ccLang.get().getString("BettingLimit"));
                 return;
@@ -566,7 +575,7 @@ public class Game
                 p.sendMessage("   §e"+BustaMine.ccLang.get().getString("MyBal") + ": " + BustaMine.ccConfig.get().getString("CurrencySymbol") + df.format(BustaMine.getEconomy().getBalance(p)));
                 p.sendMessage(BustaMine.ccLang.get().getString("Message.DivLower"));
 
-                // 브로드캐스트
+                // 釉뚮줈?쒖틦?ㅽ듃
                 if(firstBet)
                 {
                     for(String s : playerMap.keySet())
@@ -575,7 +584,7 @@ public class Game
                         try {
                             UUID uuid = UUID.fromString(s);
                             BustaMine.plugin.getServer().getPlayer(uuid).sendMessage(
-                                    "§6♣ " + p.getName() + " " + BustaMine.ccLang.get().getString("Bet") + BustaMine.ccConfig.get().getString("CurrencySymbol") +  df.format(old+amount) );
+                                    "§6" + p.getName() + " " + BustaMine.ccLang.get().getString("Bet") + " " + BustaMine.ccConfig.get().getString("CurrencySymbol") +  df.format(old+amount) );
                         }catch (Exception ignored){}
                     }
                 }
@@ -587,10 +596,11 @@ public class Game
                 return;
             }
         }
-        // 경험치로 참가
+        // 寃쏀뿕移섎줈 李멸?
         else
         {
-            if(old+amount > BustaMine.ccConfig.get().getInt("Bet.ExpMax"))
+            int maxBet = BustaMine.ccConfig.get().getInt("Bet.ExpMax");
+            if(maxBet > 0 && old+amount > maxBet)
             {
                 p.sendMessage(BustaMine.prefix+BustaMine.ccLang.get().getString("BettingLimit"));
                 return;
@@ -607,7 +617,7 @@ public class Game
                 p.sendMessage("   §e"+BustaMine.ccLang.get().getString("MyBal") + ": Xp" + CalcTotalExp(p));
                 p.sendMessage(BustaMine.ccLang.get().getString("Message.DivLower"));
 
-                // 브로드캐스트
+                // 釉뚮줈?쒖틦?ㅽ듃
                 if(firstBet)
                 {
                     for(String s : playerMap.keySet())
@@ -616,7 +626,7 @@ public class Game
                         try {
                             UUID uuid = UUID.fromString(s);
                             BustaMine.plugin.getServer().getPlayer(uuid).sendMessage(
-                                    "§6♣ " + p.getName() + " " + BustaMine.ccLang.get().getString("Bet") + " Xp" + (old+amount));
+                                    "§6" + p.getName() + " " + BustaMine.ccLang.get().getString("Bet") + " Xp" + (old+amount));
                         }catch (Exception ignored){}
                     }
                 }
@@ -637,7 +647,7 @@ public class Game
             playerMap.put(p.getUniqueId().toString(), type.toString());
             BustaMine.ccUser.get().set(p.getUniqueId() +".GamesPlayed",BustaMine.ccUser.get().getInt(p.getUniqueId() +".GamesPlayed")+1);
 
-            // 머리 추가
+            // 癒몃━ 異붽?
             if(playerMap.size()<43)
             {
                 Material m = Material.PLAYER_HEAD;
@@ -673,7 +683,7 @@ public class Game
         {
             try
             {
-                // 머리 갱신
+                // 癒몃━ 媛깆떊
                 if(headPos.containsKey(p.getUniqueId().toString()))
                 {
                     int idx = headPos.get(p.getUniqueId().toString());
@@ -720,9 +730,9 @@ public class Game
 
     public static void CashOut(Player p)
     {
-        // 참여 안함
+        // 李몄뿬 ?덊븿
         if(!activePlayerMap.containsKey(p.getUniqueId().toString())) return;
-        // 게임 진행중이 아님
+        // 寃뚯엫 吏꾪뻾以묒씠 ?꾨떂
         if(bState != bustaState.game) return;
 
         double bet = activePlayerMap.get(p.getUniqueId().toString());
@@ -773,7 +783,7 @@ public class Game
             try {
                 UUID uuid = UUID.fromString(s);
                 BustaMine.plugin.getServer().getPlayer(uuid).sendMessage(
-                        "§6♣ " + p.getName() + " " + BustaMine.ccLang.get().getString("CashedOut") + " x" + df.format(curNum / 100.0) );
+                        "§6" + p.getName() + " " + BustaMine.ccLang.get().getString("CashedOut") + " x" + df.format(curNum / 100.0) );
             }catch (Exception ignored){}
         }
 
@@ -883,7 +893,7 @@ public class Game
         p.sendMessage(BustaMine.ccLang.get().getString("Message.DivLower"));
     }
 
-    // 소리 재생
+    // ?뚮━ ?ъ깮
     public static void PlayerSoundEffect(Player player, String key)
     {
         try
@@ -957,7 +967,7 @@ public class Game
 
     private static void CreateGameInven(bustaType type)
     {
-        // UI 요소 생성
+        // UI ?붿냼 ?앹꽦
         String title = BustaMine.ccLang.get().getString("UI.Title");
         if(type == bustaType.money)
         {
@@ -977,24 +987,24 @@ public class Game
             inven.setItem(45,bankrollBtn);
         }
 
-        // 내 정보
+        // ???뺣낫
         ArrayList<String> myStateLore = new ArrayList<>();
         myStateLore.add(BustaMine.ccLang.get().getString("UI.Click"));
         ItemStack myStateBtn = CreateItemStack(Material.getMaterial(BustaMine.ccConfig.get().getString("BtnIcon.MyState")),null,
                 BustaMine.ccLang.get().getString("UI.MyState"), myStateLore,1);
         inven.setItem(47,myStateBtn);
 
-        // 기록 버튼
+        // 湲곕줉 踰꾪듉
         ItemStack historyBtn = CreateItemStack(Material.getMaterial(BustaMine.ccConfig.get().getString("BtnIcon.History")),null,
                 BustaMine.ccLang.get().getString("UI.History"), null,1);
         inven.setItem(48,historyBtn);
 
-        // 스톱 버튼
+        // ?ㅽ넲 踰꾪듉
         ItemStack closeBtn = CreateItemStack(Material.getMaterial(BustaMine.ccConfig.get().getString("BtnIcon.CashOut")),null,
                 BustaMine.ccLang.get().getString("UI.CashOut"), null,1);
         inven.setItem(49,closeBtn);
 
-        // 설정 버튼
+        // ?ㅼ젙 踰꾪듉
         ItemStack cosBtn = CreateItemStack(Material.getMaterial(BustaMine.ccConfig.get().getString("BtnIcon.CashOutSetting")),null,
                 BustaMine.ccLang.get().getString("UI.CashOutSetting"), null,1);
         inven.setItem(50,cosBtn);
@@ -1072,7 +1082,7 @@ public class Game
         for (Player p:Bukkit.getServer().getOnlinePlayers()) {
             if(p.getOpenInventory().getTitle().contains(BustaMine.ccLang.get().getString("UI.Title")))
             {
-                p.sendMessage(BustaMine.prefix+"Game was terminated by server");
+                p.sendMessage(BustaMine.prefix+"밈장이 서버에 의해 종료되었습니다.");
                 p.closeInventory();
             }
         }
@@ -1102,7 +1112,7 @@ public class Game
         String title = BustaMine.ccLang.get().getString("CO.Title");
         Inventory inven = Bukkit.createInventory(p,27, title);
 
-        // 닫기 버튼
+        // ?リ린 踰꾪듉
         ArrayList<String> closeLore = new ArrayList<>();
         closeLore.add(BustaMine.ccLang.get().getString("UI.Click"));
         ItemStack clostBtn = new ItemStack(coloredGlass.get(11));
@@ -1175,7 +1185,7 @@ public class Game
 
     //---------------------------------------------------------------------------
 
-    // 지정된 이름,lore,수량의 아이탬 스택 생성및 반환
+    // 吏?뺣맂 ?대쫫,lore,?섎웾???꾩씠???ㅽ깮 ?앹꽦諛?諛섑솚
     public static ItemStack CreateItemStack(Material material, ItemMeta _meta, String name, ArrayList<String> lore, int amount)
     {
         ItemStack istack = new ItemStack(material,amount);
@@ -1214,7 +1224,7 @@ public class Game
     static final HashMap<Integer,ItemStack> old = new HashMap<>();
     private static void DrawNumber(int num)
     {
-        // 이전에 그린 숫자 지우기
+        // ?댁쟾??洹몃┛ ?レ옄 吏?곌린
         for (Integer key:old.keySet()) {
             gameInven.setItem(key,old.get(key));
             gameInven_exp.setItem(key,old.get(key));
@@ -1272,3 +1282,4 @@ public class Game
         return result;
     }
 }
+

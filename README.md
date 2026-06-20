@@ -1,8 +1,4 @@
-# bustamine2
-let go
-1.21.1
-1.21.8
+# BustaMine
 
-spigot test wat 10/8 10/9
-
-
+Minecraft gambling plugin.
+https://www.spigotmc.org/resources/66139/
